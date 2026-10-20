@@ -3,223 +3,382 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>숨 크게 들여마시고 참으세요</title>
+  <title>다국어 검진 안내 음성(TTS) 시스템</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <!-- Pretendard Font -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
     body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background-color: #f0f4f8;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px 15px;
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+      background-color: #f1f5f9;
     }
-    .header {
-      text-align: center;
-      margin-bottom: 25px;
+    /* Pulse animation for active voice playing */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5); }
+      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
     }
-    .header h1 {
-      font-size: 26px;
-      color: #1a365d;
-      font-weight: 700;
-    }
-    .header p {
-      font-size: 15px;
-      color: #4a5568;
-      margin-top: 6px;
-    }
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      width: 100%;
-      max-width: 480px;
-    }
-    /* 한국어 전용 Full Width 스타일 */
-    .card-full {
-      grid-column: span 2;
-    }
-    .card {
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 20px 15px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      border: 1px solid #e2e8f0;
-    }
-    .flag {
-      font-size: 32px;
-      margin-bottom: 8px;
-      line-height: 1;
-    }
-    .lang-name {
-      font-size: 18px;
-      font-weight: bold;
-      color: #2d3748;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-    .play-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background-color: #f7fafc;
-      border: 1px solid #cbd5e0;
-      border-radius: 20px;
-      padding: 8px 16px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #2b6cb0;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .play-btn:hover {
-      background-color: #ebf8ff;
-      border-color: #3182ce;
+    .playing-btn {
+      animation: pulse-ring 1.5s infinite;
     }
   </style>
 </head>
-<body>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col selection:bg-blue-100">
 
-  <div class="header">
-    <h1>숨 크게 들여마시고 참으세요</h1>
-    <p>환자의 언어를 선택해 주세요.</p>
-  </div>
-
-  <div class="grid-container">
-
-
-    <!-- 2. 베트남어 / 미얀마어 -->
-    <div class="card">
-      <div class="flag">🇻🇳</div>
-      <div class="lang-name">베트남어</div>
-      <button class="play-btn" onclick="playAudio('audio-vi')">🔊 재생</button>
-      <audio id="audio-vi" src="베트남어-숨들여마시고-참으세요.m4a"></audio>
+  <!-- GNB / Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-200">
+          <i class="ph-bold ph-first-aid text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg text-slate-900 leading-tight">다국어 검진 안내 음성</h1>
+          <p class="text-xs text-slate-500 font-medium">Hospital Examination TTS System</p>
+        </div>
+      </div>
+      
+      <!-- Home Button (Persistent Navigation) -->
+      <button id="btnHome" onclick="navigateTo('home')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition-all duration-200 active:scale-95 border border-slate-200">
+        <i class="ph-bold ph-house text-base"></i>
+        <span>홈으로</span>
+      </button>
     </div>
+  </header>
 
-    <div class="card">
-      <div class="flag">🇲🇲</div>
-      <div class="lang-name">미얀마어</div>
-      <button class="play-btn" onclick="playAudio('audio-my')">🔊 재생</button>
-      <audio id="audio-my" src="미얀마-숨크게.wav"></audio>
+  <!-- Main Container -->
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
+
+    <!-- PAGE 1: Home / Country Selection Grid View -->
+    <section id="pageHome" class="space-y-6">
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg shadow-blue-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md text-xs font-semibold rounded-full mb-2">원터치 검진 안내</span>
+          <h2 class="text-xl md:text-2xl font-bold">환자의 국적을 선택해주세요</h2>
+          <p class="text-blue-100 text-sm mt-1">해당 국가를 클릭하면 한국어 검진 안내 문구 목록으로 이동합니다.</p>
+        </div>
+        <div class="px-4 py-2 bg-white/10 backdrop-blur-md rounded-xl text-xs font-medium border border-white/20">
+          총 13개 언어 지원
+        </div>
+      </div>
+
+      <!-- Country Cards Grid -->
+      <div id="countryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <!-- Dynamic JS Generation -->
+      </div>
+    </section>
+
+    <!-- PAGE 2: Audio Phrases Dedicated View -->
+    <section id="pagePhrases" class="hidden space-y-6">
+      <!-- Country Banner Header -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <span id="selectedFlag" class="text-5xl filter drop-shadow-sm">🇨🇳</span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 id="selectedLangKo" class="text-2xl font-bold text-slate-900">중국어</h2>
+              <span id="selectedLangNative" class="text-sm px-2.5 py-0.5 bg-slate-100 text-slate-600 rounded-full font-medium">中文</span>
+            </div>
+            <p class="text-sm text-slate-500 mt-0.5">안내할 한국어 문장의 <span class="text-blue-600 font-semibold">재생 버튼</span>을 누르면 해당 언어로 음성이 출력됩니다.</p>
+          </div>
+        </div>
+        
+        <!-- Quick Home Back -->
+        <button onclick="navigateTo('home')" class="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-600 font-medium transition-colors">
+          <i class="ph-bold ph-arrow-left"></i>
+          다른 언어 선택
+        </button>
+      </div>
+
+      <!-- Phrase List Container -->
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-sm divide-y divide-slate-100 overflow-hidden" id="phraseList">
+        <!-- Dynamic Phrase Items -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-8">
+    <div class="max-w-4xl mx-auto px-4 text-center text-xs text-slate-400">
+      <p>© 2026 Medical Examination Multi-language Audio System. All rights reserved.</p>
     </div>
+  </footer>
 
-
-    <!-- 3. 중국어 / 태국어 -->
-    <div class="card">
-      <div class="flag">🇨🇳</div>
-      <div class="lang-name">중국어</div>
-      <button class="play-btn" onclick="playAudio('audio-zh')">🔊 재생</button>
-      <audio id="audio-zh" src="중국어-숨크게들여마시고참으세요.wav"></audio>
-    </div>
-
-    <div class="card">
-      <div class="flag">🇹🇭</div>
-      <div class="lang-name">태국어</div>
-      <button class="play-btn" onclick="playAudio('audio-th')">🔊 재생</button>
-      <audio id="audio-th" src="태국-숨크게2.wav"></audio>
-    </div>
-
-    <!-- 4. 캄보디아어 / 네팔어 -->
-    <div class="card">
-      <div class="flag">🇰🇭</div>
-      <div class="lang-name">캄보디아어</div>
-      <button class="play-btn" onclick="playAudio('audio-km')">🔊 재생</button>
-      <audio id="audio-km" src="캄보디아-숨크게.wav"></audio>
-    </div>
-
-    <div class="card">
-      <div class="flag">🇳🇵</div>
-      <div class="lang-name">네팔어</div>
-      <button class="play-btn" onclick="playAudio('audio-ne')">🔊 재생</button>
-      <audio id="audio-ne" src="네팔어-숨크게.wav"></audio>
-    </div>
-
-    <!-- 5. 필리핀어 / 인도네시아어 -->
-    <div class="card">
-      <div class="flag">🇵🇭</div>
-      <div class="lang-name">필리핀어</div>
-      <button class="play-btn" onclick="playAudio('audio-ph')">🔊 재생</button>
-      <audio id="audio-ph" src="필리핀어-숨크게.wav"></audio>
-    </div>
-
-    <div class="card">
-      <div class="flag">🇮🇩</div>
-      <div class="lang-name">인도네시아어</div>
-      <button class="play-btn" onclick="playAudio('audio-id')">🔊 재생</button>
-      <audio id="audio-id" src="인도네시아-숨크게.wav"></audio>
-    </div>
-
-    <!-- 6. 방글라데시어 / 파키스탄어 -->
-    <div class="card">
-      <div class="flag">🇧🇩</div>
-      <div class="lang-name">방글라데시어</div>
-      <button class="play-btn" onclick="playAudio('audio-bn')">🔊 재생</button>
-      <audio id="audio-bn" src="방글라데시-숨크게.wav"></audio>
-    </div>
-
-    <div class="card">
-      <div class="flag">🇵🇰</div>
-      <div class="lang-name">파키스탄어</div>
-      <button class="play-btn" onclick="playAudio('audio-pk')">🔊 재생</button>
-      <audio id="audio-pk" src="파키스탄-숨크게.wav"></audio>
-    </div>
-
-    <!-- 7. 우즈베키스탄어 / 카자흐스탄어 -->
-    <div class="card">
-      <div class="flag">🇺🇿</div>
-      <div class="lang-name">우즈베키스탄어</div>
-      <button class="play-btn" onclick="playAudio('audio-uz')">🔊 재생</button>
-      <audio id="audio-uz" src="우즈베키스탄-숨크게.wav"></audio>
-    </div>
-
-    <div class="card">
-      <div class="flag">🇰🇿</div>
-      <div class="lang-name">카자흐스탄어</div>
-      <button class="play-btn" onclick="playAudio('audio-kz')">🔊 재생</button>
-      <audio id="audio-kz" src="카자흐스탄-숨크게.wav"></audio>
-    </div>
-
-    <!-- 8. 몽골어 / 러시아어 -->
-    <div class="card">
-      <div class="flag">🇲🇳</div>
-      <div class="lang-name">몽골어</div>
-      <button class="play-btn" onclick="playAudio('audio-mn')">🔊 재생</button>
-      <audio id="audio-mn" src="몽골-숨크게.m4a"></audio>
-    </div>
-
-    <div class="card">
-      <div class="flag">🇷🇺</div>
-      <div class="lang-name">러시아어</div>
-      <button class="play-btn" onclick="playAudio('audio-ru')">🔊 재생</button>
-      <audio id="audio-ru" src="러시아-숨크게.wav"></audio>
-    </div>
-
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-medium opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2 z-50">
+    <i class="ph-bold ph-speaker-high text-blue-400 text-lg"></i>
+    <span id="toastMsg">음성을 재생합니다.</span>
   </div>
 
   <script>
-    function playAudio(id) {
-      // 현재 재생 중인 모든 오디오 멈춤
-      const audios = document.querySelectorAll('audio');
-      audios.forEach(audio => {
-        audio.pause();
-        audio.currentTime = 0;
+    // 1. 한국어 검진 안내 문구 목록 (의료진 판독용 - 요청된 순서 반영)
+    const koreanPhrases = [
+      "1. 숨 크게 들여마시고 참으세요",
+      "2. 숨 내쉬세요",
+      "3. 똑바로 누우세요",
+      "4. 벽 보고 누우세요",
+      "5. 신발 벗고 누우세요",
+      "6. 가운을 벗으세요",
+      "7. 바지와 팬티 탈의하시고 가운을 입으세요",
+      "8. 검사가 끝났습니다. 젤을 닦고 가운을 입으세요",
+      "9. 밖에서 기다려주세요"
+    ];
+
+    // 2. 13개 국가 언어 및 번역 데이터 (변경된 문구 순서와 1:1 매칭)
+    const languages = [
+      {
+        id: 'china', code: 'zh-CN', flag: '🇨🇳', ko: '중국어', native: '中文',
+        tts: [
+          "请深吸一口气，然后憋住。", "请呼气。", "请平躺。", "请面向墙壁躺下。",
+          "请脱鞋躺下。", "请脱下外衣。", "请脱下裤子和内裤，穿上诊察服。",
+          "检查结束了。请擦掉凝胶并穿上外衣。", "请在外面稍等。"
+        ]
+      },
+      {
+        id: 'mongolia', code: 'mn-MN', flag: '🇲🇳', ko: '몽골어', native: 'Монгол',
+        tts: [
+          "Гүнзгий амьсгаа аваад түгжээрэй.", "Амьсгаагаа гаргаарай.", "Чигээрээ харж хэвтэнэ үү.", "Ханан тал руу харж хэвтэнэ үү.",
+          "Гутал аа тайлаад хэвтэнэ үү.", "Халаад аа тайлна уу.", "Өмд болон дотуур хувцсаа тайлаад халаад өмсөнө үү.",
+          "Шинжилгээ дууслаа. Желээ арчаад халаадаа өмсөнө үү.", "Гадаа хүлээнэ үү."
+        ]
+      },
+      {
+        id: 'vietnam', code: 'vi-VN', flag: '🇻🇳', ko: '베트남어', native: 'Tiếng Việt',
+        tts: [
+          "Hít một hơi thật sâu và nín thở.", "Thở ra.", "Nằm ngửa ra.", "Nằm nghiêng quay mặt vào tường.",
+          "Xin vui lòng tháo giày và nằm xuống.", "Cởi áo khoác ngoài ra.", "Hãy cởi quần và quần lót ra rồi mặc áo choàng vào.",
+          "Kiểm tra đã xong. Hãy lau sạch gel và mặc áo choàng vào.", "Xin vui lòng chờ ở bên ngoài."
+        ]
+      },
+      {
+        id: 'thailand', code: 'th-TH', flag: '🇹🇭', ko: '태국어', native: 'ไทย',
+        tts: [
+          "สูดหายใจเข้าลึกๆ แล้วกลั้นหายใจไว้ครับ", "ผ่อนลมหายใจออกครับ", "ชี้นอนหงายตรงๆ ครับ", "นอนหันหน้าเข้าหาผนังครับ",
+          "กรุณาถอดรองเท้าแล้วนอนลงครับ", "กรุณาถอดเสื้อคลุมออกครับ", "กรุณาถอดกางเกงและกางเกงชั้นในออก แล้วสวมเสื้อคลุมครับ",
+          "การตรวจเสร็จสิ้นแล้ว เช็ดเจลออกและสวมเสื้อคลุมได้ครับ", "กรุณารอด้านนอกครับ"
+        ]
+      },
+      {
+        id: 'cambodia', code: 'km-KH', flag: '🇰🇭', ko: '캄보디아어', native: 'ភាសារខ្មែរ',
+        tts: [
+          "សូមដកដង្ហើមចូលឲ្យជ្រៅ ហើយទប់ដង្ហើមไว้।", "សូមដកដង្ហើមចេញ।", "សូមគេងផ្ងារត្រង់।", "សូមគេងបែរមុខទៅជញ្ជាំង।",
+          "សូមដោះស្បែកជើង ហើយគេងចុះ।", "សូមដោះអាវក្រៅចេញ।", "សូមដោះខោ និងខោក្នុងចេញ ហើយពាក់អាវពេទ្យ।",
+          "ការពិនិត្យបានបញ្ចប់ហើយ। សូមជូតជែលចេញ ហើយពាក់អាវក្រៅ।", "សូមរង់ចាំនៅខាងក្រៅ।"
+        ]
+      },
+      {
+        id: 'myanmar', code: 'my-MM', flag: '🇲🇲', ko: '미얀마어', native: 'မြန်မာဘာသာ',
+        tts: [
+          "အသက်ကို ဝဝရှူပြီး အသက်အောင့်ထားပါ။", "အသက်ပြန်ရှူထုတ်ပါ။", "တည့်တည့် လှဲအိပ်ပါ။", "နံရံဘက်လှည့်ပြီး လှဲအိပ်ပါ။",
+          "ဖိနပ်ချွတ်ပြီး လှဲအိပ်ပါ။", "ဝတ်ရုံကို ချွတ်ပါ။", "ဘောင်းဘီနှင့် အတွင်းခံကို ချွတ်ပြီး ဝတ်ရုံကို ဝတ်ပါ။",
+          "စစ်ဆေးမှု ပြီးပါပြီ။ ဂျယ်လ်ကို သုတ်ပြီး ဝတ်ရုံပြန်ဝတ်ပါ။", "ပြင်ပမှာ စောင့်ဆိုင်းပေးပါ။"
+        ]
+      },
+      {
+        id: 'nepal', code: 'ne-NP', flag: '🇳🇵', ko: '네팔어', native: 'नेपाली',
+        tts: [
+          "लामो सास फेर्नुहोस् र रोक्नुहोस्।", "सास बाहिर छोड्नुहोस्।", "सिधा पल्टिनुहोस्।", "भित्तातर्फ फर्केर पल्टिनुहोस्।",
+          "জুत्ता खोलेर पल्टिनुहोस्।", "गाउन खोल्नुहोस्।", "प्यान्ट र भित्री वस्त्र खोलेर गाउन लगाउनुहोस्।",
+          "जाँच सकियो। जेल पुछेर गाउन लगाउनुहोस्।", "बाहिर पर्खनुहोस्।"
+        ]
+      },
+      {
+        id: 'indonesia', code: 'id-ID', flag: '🇮🇩', ko: '인도네시아어', native: 'Bahasa Indonesia',
+        tts: [
+          "Tarik napas dalam-dalam dan tahan napas.", "Hembuskan napas.", "Berbaringlah terlentang.", "Berbaringlah menghadap ke dinding.",
+          "Lepas sepatu dan silakan berbaring.", "Lepaskan jubah Anda.", "Lepaskan celana dan celana dalam, lalu kenakan gaun pemeriksaan.",
+          "Pemeriksaan telah selesai. Bersihkan gel dan kenakan jubah Anda.", "Silakan tunggu di luar."
+        ]
+      },
+      {
+        id: 'bengali', code: 'bn-BD', flag: '🇧🇩', ko: '벵골어', native: 'বাংলা',
+        tts: [
+          "দীর্ঘ শ্বাস নিন এবং আটকে রাখুন।", "শ্বাস ছেড়ে দিন।", "সোজা হয়ে শুয়ে পড়ুন।", "দেয়ালের দিকে মুখ করে শুয়ে পড়ুন।",
+          "জুতো খুলে শুয়ে পড়ুন।", "গাউনটি খুলে ফেলুন।", "প্যান্ট এবং অন্তর্বাস খুলে গাউনটি পরে নিন।",
+          "পরীক্ষা শেষ হয়েছে। জেল মুছে ফেলুন এবং গাউন পরুন।", "বাইরে অপেক্ষা করুন।"
+        ]
+      },
+      {
+        id: 'urdu', code: 'ur-PK', flag: '🇵🇰', ko: '우르두어', native: 'اردو',
+        tts: [
+          "گہرا سانس لیں اور روکیں۔", "سانس باہر نکالیں۔", "سیدھے لیٹ جائیں۔", "دیوار کی طرف منہ کر کے لیٹ جائیں۔",
+          "جوتے اتار کر لیٹ جائیں۔", "گاؤن اتاریں۔", "پینٹ اور انڈر ویئر اتار کر گاؤن پہن لیں۔",
+          "معائنہ مکمل ہو گیا۔ جیل صاف کریں اور گاؤن پہن لیں۔", "براہ کرم باہر انتظار کریں۔"
+        ]
+      },
+      {
+        id: 'uzbek', code: 'uz-UZ', flag: '🇺🇿', ko: '우즈베키스탄어', native: "O'zbekcha",
+        tts: [
+          "Chuqur nafas oling va ushlab turing.", "Nafas chiqaring.", "Tekis yoting.", "Devorga qarab yoting.",
+          "Poyabzalingizni yechib yoting.", "Xalatni yeching.", "Shalvar va ichki kiyimni yechib, xalatni kiying.",
+          "Tekshiruv tugadi. Gelni artib, xalatni kiying.", "Tashqarida kutib turing."
+        ]
+      },
+      {
+        id: 'kazakh', code: 'kk-KZ', flag: '🇰🇿', ko: '카자흐스탄어', native: 'Қазақ тілі',
+        tts: [
+          "Терең тыныс алып, ұстап тұрыңыз.", "Тыныс шығарыңыз.", "Түзу жатыңыз.", "Қабырғаға қарап жатыңыз.",
+          "Аяқ киіміңізді шешіп жатыңыз.", "Халатты шешіңіз.", "Шабар мен іш киімді шешіп, халатты киіңіз.",
+          "Тексеру аяқталды. Гельді сүртіп, халатты киіңіз.", "Сыртта күте тұрыңыз."
+        ]
+      },
+      {
+        id: 'russian', code: 'ru-RU', flag: '🇷🇺', ko: '러시아어', native: 'Русский',
+        tts: [
+          "Сделайте глубокий вдох и задержите дыхание.", "Выдохните.", "Лягте ровно на спину.", "Лягте лицом к стене.",
+          "Снимите обувь и лягте.", "Снимите халат.", "Снимите брюки и нижнее белье и надеть халат.",
+          "Осмотр окончен. Вытрите гель и наденьте халат.", "Пожалуйста, подождите снаружи."
+        ]
+      }
+    ];
+
+    let currentSelectedLang = null;
+
+    // DOM Elements
+    const pageHome = document.getElementById('pageHome');
+    const pagePhrases = document.getElementById('pagePhrases');
+    const countryGrid = document.getElementById('countryGrid');
+    const phraseList = document.getElementById('phraseList');
+
+    // Render Country Cards Grid
+    function renderCountryGrid() {
+      countryGrid.innerHTML = '';
+      languages.forEach((lang) => {
+        const card = document.createElement('div');
+        card.className = "bg-white hover:bg-blue-50/50 border border-slate-200 hover:border-blue-300 rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group active:scale-95";
+        card.innerHTML = `
+          <div class="text-4xl md:text-5xl mb-3 group-hover:scale-110 transition-transform duration-200 filter drop-shadow-sm">${lang.flag}</div>
+          <div class="font-bold text-slate-800 text-base group-hover:text-blue-600 transition-colors">${lang.ko}</div>
+          <div class="text-xs text-slate-400 mt-1 font-medium">${lang.native}</div>
+          <div class="mt-3 px-3 py-1 bg-slate-100 group-hover:bg-blue-100 text-slate-600 group-hover:text-blue-700 text-xs font-semibold rounded-full flex items-center gap-1 transition-colors">
+            <i class="ph-bold ph-speaker-high"></i>
+            <span>선택하기</span>
+          </div>
+        `;
+        card.onclick = () => selectCountry(lang);
+        countryGrid.appendChild(card);
+      });
+    }
+
+    // Select Country -> Open Dedicated Phrase View
+    function selectCountry(lang) {
+      currentSelectedLang = lang;
+      
+      // Update Detail Page UI
+      document.getElementById('selectedFlag').textContent = lang.flag;
+      document.getElementById('selectedLangKo').textContent = lang.ko;
+      document.getElementById('selectedLangNative').textContent = lang.native;
+
+      // Render Korean Phrase List
+      phraseList.innerHTML = '';
+      koreanPhrases.forEach((phraseText, idx) => {
+        const item = document.createElement('div');
+        item.className = "p-4 sm:p-5 flex items-center justify-between gap-4 hover:bg-slate-50 transition-colors";
+        
+        item.innerHTML = `
+          <div class="flex-1 pr-2">
+            <span class="text-base sm:text-lg font-bold text-slate-800 leading-snug">${phraseText}</span>
+          </div>
+          <button id="btn-play-${idx}" onclick="playAudio('${idx}')" class="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl shadow-md shadow-blue-200 flex items-center gap-2 text-sm transition-all active:scale-95">
+            <i class="ph-bold ph-speaker-high text-lg"></i>
+            <span>재생</span>
+          </button>
+        `;
+        phraseList.appendChild(item);
       });
 
-      // 선택한 음성 재생
-      const targetAudio = document.getElementById(id);
-      if (targetAudio) {
-        targetAudio.play();
+      navigateTo('phrases');
+    }
+
+    // Page Navigation Router (SPA Style)
+    function navigateTo(page) {
+      // Cancel active speech if navigating away
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      if (page === 'home') {
+        pagePhrases.classList.add('hidden');
+        pageHome.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (page === 'phrases') {
+        pageHome.classList.add('hidden');
+        pagePhrases.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
-  </script>
 
+    // Play TTS Function
+    function playAudio(index) {
+      if (!currentSelectedLang) return;
+
+      const ttsText = currentSelectedLang.tts[index];
+      const koText = koreanPhrases[index];
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Stop current playing speech
+
+        const utterance = new SpeechSynthesisUtterance(ttsText);
+        utterance.lang = currentSelectedLang.code;
+        utterance.rate = 0.85; // Slightly slower for medical examination clarity
+
+        const playBtn = document.getElementById(`btn-play-${index}`);
+        
+        utterance.onstart = () => {
+          showToast(`[${currentSelectedLang.ko}] "${koText}" 음성을 재생 중입니다.`);
+          if(playBtn) {
+            playBtn.classList.add('playing-btn', 'bg-emerald-600');
+            playBtn.classList.remove('bg-blue-600');
+            playBtn.querySelector('span').textContent = '재생 중...';
+          }
+        };
+
+        utterance.onend = () => {
+          if(playBtn) {
+            playBtn.classList.remove('playing-btn', 'bg-emerald-600');
+            playBtn.classList.add('bg-blue-600');
+            playBtn.querySelector('span').textContent = '재생';
+          }
+        };
+
+        utterance.onerror = (e) => {
+          showToast('음성 재생 중 오류가 발생했습니다.');
+          if(playBtn) {
+            playBtn.classList.remove('playing-btn', 'bg-emerald-600');
+            playBtn.classList.add('bg-blue-600');
+            playBtn.querySelector('span').textContent = '재생';
+          }
+        };
+
+        window.speechSynthesis.speak(utterance);
+      } else {
+        alert('이 브라우저는 음성 합성(TTS) 기능을 지원하지 않습니다.');
+      }
+    }
+
+    // Toast Notification helper
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.textContent = msg;
+      
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      toast.classList.add('opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 2500);
+    }
+
+    // Initial Load
+    window.onload = () => {
+      renderCountryGrid();
+    };
+  </script>
 </body>
 </html>
