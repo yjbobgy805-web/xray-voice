@@ -3,40 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>다국어 검진 안내 음성(TTS) 시스템</title>
+  <title>다국어 검진 안내 서비스</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f4f7f9; color: #333; padding: 20px; }
     .container { max-width: 900px; margin: 0 auto; }
     
-    /* 상단 헤더 / 홈 버튼 */
     header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0; }
     h1 { color: #1a365d; font-size: 22px; font-weight: 700; }
-    .home-btn { background: #4a5568; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; display: none; align-items: center; gap: 6px; }
+    .home-btn { background: #4a5568; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; display: none; align-items: center; gap: 6px; }
     .home-btn:hover { background: #2d3748; }
 
-    /* 화면 전환 (뷰) */
     .view-page { display: none; }
     .view-page.active { display: block; }
 
-    /* 언어 선택 카드 그리드 */
     .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-    .country-card { background: #fff; border-radius: 16px; padding: 20px 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.2s ease; border: 2px solid #edf2f7; }
+    .country-card { background: #fff; border-radius: 16px; padding: 20px 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; border: 2px solid #edf2f7; transition: all 0.2s; }
     .country-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-color: #cbd5e0; }
     .flag { font-size: 42px; display: block; margin-bottom: 10px; }
     .lang-ko { font-weight: bold; font-size: 16px; color: #2d3748; }
     .lang-native { font-size: 13px; color: #718096; margin-top: 4px; }
 
-    /* 상세 안내문구 화면 */
     .phrase-card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .selected-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #edf2f7; color: #2b6cb0; display: flex; align-items: center; gap: 10px; }
+    .selected-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #edf2f7; color: #2b6cb0; }
     
     .phrase-list { display: flex; flex-direction: column; gap: 12px; }
     .phrase-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
-    .phrase-item:hover { background: #f1f5f9; }
-    .phrase-ko { font-weight: 600; font-size: 16px; color: #1a202c; line-height: 1.4; }
+    .phrase-ko { font-weight: 600; font-size: 16px; color: #1a202c; }
     
-    .play-btn { background: #3182ce; color: #fff; border: none; padding: 10px 18px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 14px; transition: background 0.2s; white-space: nowrap; }
+    .play-btn { background: #3182ce; color: #fff; border: none; padding: 10px 18px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 14px; white-space: nowrap; }
     .play-btn:hover { background: #2b6cb0; }
     .play-btn.playing { background: #e53e3e; }
   </style>
@@ -44,18 +39,15 @@
 <body>
 
 <div class="container">
-  <!-- 상단 헤더 -->
   <header>
     <h1>🏥 다국어 검진 안내 서비스</h1>
     <button class="home-btn" id="homeBtn" onclick="goHome()">🏠 홈으로</button>
   </header>
 
-  <!-- 메인 화면: 언어 선택 카드 목록 -->
   <div class="view-page active" id="homeView">
     <div class="country-grid" id="countryGrid"></div>
   </div>
 
-  <!-- 상세 화면: 안내 문구 (한국어) 및 음성 재생 -->
   <div class="view-page" id="detailView">
     <div class="phrase-card">
       <div class="selected-title" id="selectedTitle"></div>
@@ -65,7 +57,6 @@
 </div>
 
 <script>
-// 요청하신 한국어 문구 순서 (1번 ~ 9번)
 const koreanPhrases = [
   "1. 숨 크게 들여마시고 참으세요",
   "2. 숨 내쉬세요",
@@ -78,136 +69,82 @@ const koreanPhrases = [
   "9. 밖에서 기다려주세요"
 ];
 
-// 13개 언어 Google TTS 맞춤 텍스트 및 코드
 const languages = [
   {
-    code: 'zh-CN', flag: '🇨🇳', ko: '중국어', native: '中文',
-    tts: [
-      "请深吸一口气，然后憋住。", "请呼气。", "请平躺。", "请面向墙壁躺下。",
-      "请脱鞋躺下。", "请脱下外衣。", "请脱下裤子和内裤，穿上诊察服。",
-      "检查结束了。请擦掉凝胶并穿上外衣。", "请在外面稍等。"
-    ]
+    code: "zh-CN", flag: "🇨🇳", ko: "중국어", native: "中文",
+    tts: ["请深吸一口气，然后憋住。", "请呼气。", "请平躺。", "请面向墙壁躺下。", "请脱鞋躺下。", "请脱下外衣。", "请脱下裤子和内裤，穿上诊察服。", "检查结束了。请擦掉凝胶并穿上外衣。", "请在外面稍等。"]
   },
   {
-    code: 'mn', flag: '🇲🇳', ko: '몽골어', native: 'Монгол',
-    tts: [
-      "Гүнзгий амьсгаа аваад түгжээрэй.", "Амьсгаагаа гаргаарай.", "Чигээрээ харж хэвтэнэ үү.", "Ханан тал руу харж хэвтэнэ үү.",
-      "Гутал аа тайлаад хэвтэнэ үү.", "Халаад аа тайлна уу.", "Өмд болон дотуур хувцсаа тайлаад халаад өмсөнө үү.",
-      "Шинжилгээ дууслаа. Желээ арчаад халаадаа өмсөнө үү.", "Гадаа хүлээнэ үү."
-    ]
+    code: "mn-MN", flag: "🇲🇳", ko: "몽골어", native: "Монгол",
+    tts: ["Гүнзгий амьсгаа аваад түгжээрэй.", "Амьсгаагаа гаргаарай.", "Чигээрээ харж хэвтэнэ үү.", "Ханан тал руу харж хэвтэнэ үү.", "Гутал аа тайлаад хэвтэнэ үү.", "Халаад аа тайлна уу.", "Өмд болон дотуур хувцсаа тайлаад халаад өмсөнө үү.", "Шинжилгээ дууслаа. Желээ арчаад халаадаа өмсөнө үү.", "Гадаа хүлээнэ үү."]
   },
   {
-    code: 'vi', flag: '🇻🇳', ko: '베트남어', native: 'Tiếng Việt',
-    tts: [
-      "Hít một hơi thật sâu và nín thở.", "Thở ra.", "Nằm ngửa ra.", "Nằm nghiêng quay mặt vào tường.",
-      "Xin vui lòng tháo giày và nằm xuống.", "Cởi áo khoác ngoài ra.", "Hãy cởi quần và quần lót ra rồi mặc áo choàng vào.",
-      "Kiểm tra đã xong. Hãy lau sạch gel và mặc áo choàng vào.", "Xin vui lòng chờ ở bên ngoài."
-    ]
+    code: "vi-VN", flag: "🇻🇳", ko: "베트남어", native: "Tiếng Việt",
+    tts: ["Hít một hơi thật sâu và nín thở.", "Thở ra.", "Nằm ngửa ra.", "Nằm nghiêng quay mặt vào tường.", "Xin vui lòng tháo giày và nằm xuống.", "Cởi áo khoác ngoài ra.", "Hãy cởi quần và quần lót ra rồi mặc áo choàng vào.", "Kiểm tra đã xong. Hãy lau sạch gel và mặc áo choàng vào.", "Xin vui lòng chờ ở bên ngoài."]
   },
   {
-    code: 'th', flag: '🇹🇭', ko: '태국어', native: 'ไทย',
-    tts: [
-      "สูดหายใจเข้าลึกๆ แล้วกลั้นหายใจไว้ครับ", "ผ่อนลมหายใจออกครับ", "ชี้นอนหงายตรงๆ ครับ", "นอนหันหน้าเข้าหาผนังครับ",
-      "กรุณาถอดรองเท้าแล้วนอนลงครับ", "กรุณาถอดเสื้อคลุมออกครับ", "กรุณาถอดกางเกงและกางเกงชั้นในออก แล้วสวมเสื้อคลุมครับ",
-      "การตรวจเสร็จสิ้นแล้ว เช็ดเจลออกและสวมเสื้อคลุมได้ครับ", "กรุณารอด้านนอกครับ"
-    ]
+    code: "th-TH", flag: "🇹🇭", ko: "태국어", native: "ไทย",
+    tts: ["สูดหายใจเข้าลึกๆ แล้วกลั้นหายใจไว้ครับ", "ผ่อนลมหายใจออกครับ", "ชี้นอนหงายตรงๆ ครับ", "นอนหันหน้าเข้าหาผนังครับ", "กรุณาถอดรองเท้าแล้วนอนลงครับ", "กรุณาถอดเสื้อคลุมออกครับ", "กรุณาถอดกางเกงและกางเกงชั้นในออก แล้วสวมเสื้อคลุมครับ", "การตรวจเสร็จสิ้นแล้ว เช็ดเจลออกและสวมเสื้อคลุมได้ครับ", "กรุณารอด้านนอกครับ"]
   },
   {
-    code: 'km', flag: '🇰🇭', ko: '캄보디아어', native: 'ភាសារខ្មែរ',
-    tts: [
-      "សូមដកដង្ហើមចូលឲ្យជ្រៅ ហើយទប់ដង្ហើមไว้", "សូមដកដង្ហើមចេញ", "សូមគេងផ្ងារត្រង់", "សូមគេងបែរមុខទៅជញ្ជាំង",
-      "សូមដោះស្បែកជើង ហើយគេងចុះ", "សូមដោះអាវក្រៅចេញ", "សូមដោះខោ និងខោក្នុងចេញ ហើយពាក់អាវពេទ្យ",
-      "ការពិនិត្យបានបញ្ចប់ហើយ សូមជូតជែលចេញ ហើយពាក់អាវក្រៅ", "សូមរង់ចាំនៅខាងក្រៅ"
-    ]
+    code: "km-KH", flag: "🇰🇭", ko: "캄보디아어", native: "ភាសារខ្មែរ",
+    tts: ["សូមដកដង្ហើមចូលឲ្យជ្រៅ ហើយទប់ដង្ហើមไว้", "សូមដកដង្ហើមចេញ", "សូមគេងផ្ងារត្រង់", "សូមគេងបែរមុខទៅជញ្ជាំង", "សូមដោះស្បែកជើង ហើយគេងចុះ", "សូមដោះអាវក្រៅចេញ", "សូមដោះខោ និងខោក្នុងចេញ ហើយពាក់អាវពេទ្យ", "ការពិនិត្យបានបញ្ចប់ហើយ សូមជូតជែលចេញ ហើយពាក់អាវក្រៅ", "សូមរង់ចាំនៅខាងក្រៅ"]
   },
   {
-    code: 'my', flag: '🇲🇲', ko: '미얀မာ어', native: 'မြန်မာဘာသာ',
-    tts: [
-      "အသက်ကို ဝဝရှူပြီး အသက်အောင့်ထားပါ။", "အသက်ပြန်ရှူထုတ်ပါ။", "တည့်တည့် လှဲအိပ်ပါ။", "နံရံဘက်လှည့်ပြီး လှဲအိပ်ပါ။",
-      "ဖိနပ်ချွတ်ပြီး လှဲအိပ်ပါ။", "ဝတ်ရုံကို ချွတ်ပါ။", "ဘောင်းဘီနှင့် အတွင်းခံကို ချွတ်ပြီး ဝတ်ရုံကို ဝတ်ပါ။",
-      "စစ်ဆေးမှု ပြီးပါပြီ။ ဂျယ်လ်ကို သုတ်ပြီး ဝတ်ရုံပြန်ဝတ်ပါ။", "ပြင်ပမှာ စောင့်ဆိုင်းပေးပါ။"
-    ]
+    code: "my-MM", flag: "🇲🇲", ko: "미얀마어", native: "မြန်မာဘာသာ",
+    tts: ["အသက်ကို ဝဝရှူပြီး အသက်အောင့်ထားပါ။", "အသက်ပြန်ရှူထုတ်ပါ။", "တည့်တည့် လှဲအိပ်ပါ။", "နံရံဘက်လှည့်ပြီး လှဲအိပ်ပါ။", "ဖိနပ်ချွတ်ပြီး လှဲအိပ်ပါ။", "ဝတ်ရုံကို ချွတ်ပါ။", "ဘောင်းဘီနှင့် အတွင်းခံကို ချွတ်ပြီး ဝတ်ရုံကို ဝတ်ပါ။", "စစ်ဆေးမှု ပြီးပါပြီ။ ဂျယ်လ်ကို သုတ်ပြီး ဝတ်ရုံပြန်ဝတ်ပါ။", "ပြင်ပမှာ စောင့်ဆိုင်းပေးပါ။"]
   },
   {
-    code: 'ne', flag: '🇳🇵', ko: '네팔어', native: 'नेपाली',
-    tts: [
-      "लामो सास फेर्नुहोस् र रोक्नुहोस्।", "सास बाहिर छोड्नुहोस्।", "सिधा पल्टिनुहोस्।", "भित्तातर्फ फर्केर पल्टिनुहोस्।",
-      "জুत्ता खोलेर पल्टिनुहोस्।", "गाउन खोल्नुहोस्।", "प्यान्ट र भित्री वस्त्र खोलेर गाउन लगाउनुहोस्।",
-      "जाँच सकियो। जेल पुछेर गाउन लगाउनुहोस्।", "बाहिर पर्खनुहोस्।"
-    ]
+    code: "ne-NP", flag: "🇳🇵", ko: "네팔어", native: "नेपाली",
+    tts: ["लामो सास फेर्नुहोस् र रोक्नुहोस्।", "सास बाहिर छोड्नुहोस्।", "सिधा पल्टिनुहोस्।", "भित्तातर्फ फर्केर पल्टिनुहोस्।", "জুত্তা खोलेर पल्टिनुहोस्।", "गाउन खोल्नुहोस्।", "प्यान्ट र भित्री वस्त्र खोलेर गाउन लगाउनुहोस्।", "जाँच सकियो। जेल पुछेर गाउन लगाउनुहोस्।", "बाहिर पर्खनुहोस्।"]
   },
   {
-    code: 'id', flag: '🇮🇩', ko: '인도네시아어', native: 'Bahasa Indonesia',
-    tts: [
-      "Tarik napas dalam-dalam dan tahan napas.", "Hembuskan napas.", "Berbaringlah terlentang.", "Berbaringlah menghadap ke dinding.",
-      "Lepas sepatu dan silakan berbaring.", "Lepaskan jubah Anda.", "Lepaskan celana dan celana dalam, lalu kenakan gaun pemeriksaan.",
-      "Pemeriksaan telah selesai. Bersihkan gel dan kenakan jubah Anda.", "Silakan tunggu di luar."
-    ]
+    code: "id-ID", flag: "🇮🇩", ko: "인도네시아어", native: "Bahasa Indonesia",
+    tts: ["Tarik napas dalam-dalam dan tahan napas.", "Hembuskan napas.", "Berbaringlah terlentang.", "Berbaringlah menghadap ke dinding.", "Lepas sepatu dan silakan berbaring.", "Lepaskan jubah Anda.", "Lepaskan celana dan celana dalam, lalu kenakan gaun pemeriksaan.", "Pemeriksaan telah selesai. Bersihkan gel dan kenakan jubah Anda.", "Silakan tunggu di luar."]
   },
   {
-    code: 'bn', flag: '🇧🇩', ko: '벵골어', native: 'বাংলা',
-    tts: [
-      "দীর্ঘ শ্বাস নিন এবং আটকে রাখুন।", "শ্বাস ছেড়ে দিন।", "সোজা হয়ে শুয়ে পড়ুন।", "দেয়ালের দিকে মুখ করে শুয়ে পড়ুন।",
-      "জুতো খুলে শুয়ে পড়ুন।", "গাউনটি খুলে ফেলুন।", "প্যান্ট এবং অন্তর্বাস খুলে গাউনটি পরে নিন।",
-      "পরীক্ষা শেষ হয়েছে। জেল মুছে ফেলুন এবং গাউন পরুন।", "বাইরে অপেক্ষা করুন।"
-    ]
+    code: "bn-BD", flag: "🇧🇩", ko: "벵골어", native: "বাংলা",
+    tts: ["দীর্ঘ শ্বাস নিন এবং আটকে রাখুন।", "শ্বাস ছেড়ে দিন।", "সোজা হয়ে শুয়ে পড়ুন।", "দেয়ালের দিকে মুখ করে শুয়ে পড়ুন।", "জুতো খুলে শুয়ে পড়ুন।", "গাউনটি খুলে ফেলুন।", "প্যান্ট এবং অন্তর্বাস খুলে গাউনটি পরে নিন।", "পরীক্ষা শেষ হয়েছে। জেল মুছে ফেলুন এবং গাউন পরুন।", "বাইরে অপেক্ষা করুন।"]
   },
   {
-    code: 'ur', flag: '🇵🇰', ko: '우르두어', native: 'اردو',
-    tts: [
-      "گہرا سانس لیں اور روکیں۔", "سانس باہر نکالیں۔", "سیدھے لیট جائیں۔", "دیوار کی طرف منہ کر کے لیٹ جائیں۔",
-      "جوتے اتار کر لیٹ جائیں۔", "گاؤن اتاریں۔", "پینٹ اور انڈر ویئر اتار کر گاؤن پہن لیں۔",
-      "معائنہ مکمل ہو گیا۔ جیل صاف کریں اور گاؤن پہن لیں۔", "براہ کرم باہر انتظار کریں۔"
-    ]
+    code: "ur-PK", flag: "🇵🇰", ko: "우르두어", native: "اردو",
+    tts: ["گہرا سانس لیں اور روکیں۔", "سانس باہر نکالیں۔", "سیدھے لیٹ جائیں۔", "دیوار کی طرف منہ کر کے لیٹ جائیں۔", "جوتے اتار کر لیٹ جائیں۔", "گاؤن اتاریں۔", "پینٹ اور انڈر ویئر اتار کر گاؤن پہن لیں۔", "معائنہ مکمل ہو گیا۔ جیل صاف کریں اور گاؤن پہن لیں۔", "براہ کرم باہر انتظار کریں۔"]
   },
   {
-    code: 'uz', flag: '🇺🇿', ko: '우즈베키스탄어', native: "O'zbekcha",
-    tts: [
-      "Chuqur nafas oling va ushlab turing.", "Nafas chiqaring.", "Tekis yoting.", "Devorga qarab yoting.",
-      "Poyabzalingizni yechib yoting.", "Xalatni yeching.", "Shalvar va ichki kiyimni yechib, xalatni kiying.",
-      "Tekshiruv tugadi. Gelni artib, xalatni kiying.", "Tashqarida kutib turing."
-    ]
+    code: "uz-UZ", flag: "🇺🇿", ko: "우즈베키스탄어", native: "O'zbekcha",
+    tts: ["Chuqur nafas oling va ushlab turing.", "Nafas chiqaring.", "Tekis yoting.", "Devorga qarab yoting.", "Poyabzalingizni yechib yoting.", "Xalatni yeching.", "Shalvar va ichki kiyimni yechib, xalatni kiying.", "Tekshiruv tugadi. Gelni artib, xalatni kiying.", "Tashqarida kutib turing."]
   },
   {
-    code: 'kk', flag: '🇰🇿', ko: '카자흐스탄어', native: 'Қазақ тілі',
-    tts: [
-      "Терең тыныс алып, ұстап тұрыңыз.", "Тыныс шығарыңыз.", "Түзу жатыңыз.", "Қабырғаға қарап жатыңыз.",
-      "Аяқ киіміңізді шешіп жатыңыз.", "Халатты шешіңіз.", "Шабар мен іш киімді шешіп, халатты киіңіз.",
-      "Тексеру аяқталды. Гельді сүртіп, халатты киіңіз.", "Сыртта күте тұрыңыз."
-    ]
+    code: "kk-KZ", flag: "🇰🇿", ko: "카자흐스탄어", native: "Қазақ тілі",
+    tts: ["Терең тыныс алып, ұстап тұрыңыз.", "Тыныс шығарыңыз.", "Түзу жатыңыз.", "Қабырғаға қарап жатыңыз.", "Аяқ киіміңізді шешіп жатыңыз.", "Халатты шешіңіз.", "Шабар мен іш киімді шешіп, халатты киіңіз.", "Тексеру аяқталды. Гельді сүртіп, халатты киіңіз.", "Сыртта күте тұрыңыз."]
   },
   {
-    code: 'ru', flag: '🇷🇺', ko: '러시아어', native: 'Русский',
-    tts: [
-      "Сделайте глубокий вдох и задержите дыхание.", "Выдохните.", "Лягте ровно на спину.", "Лягте лицом к стене.",
-      "Снимите обувь и лягте.", "Снимите халат.", "Снимите брюки и нижнее белье и надеть халат.",
-      "Осмотр окончен. Вытрите гель и наденьте халат.", "Пожалуйста, подождите снаружи."
-    ]
+    code: "ru-RU", flag: "🇷🇺", ko: "러시아어", native: "Русский",
+    tts: ["Сделайте глубокий вдох и задержите дыхание.", "Выдохните.", "Лягте ровно на спину.", "Лягте лицом к стене.", "Снимите обувь и лягте.", "Снимите халат.", "Снимите брюки и нижнее белье и надеть халат.", "Осмотр окончен. Вытрите гель и наденьте халат.", "Пожалуйста, подождите снаружи."]
   }
 ];
 
-// 국가 카드 목록 생성
-const grid = document.getElementById('countryGrid');
-languages.forEach((lang, idx) => {
-  const card = document.createElement('div');
-  card.className = 'country-card';
-  card.innerHTML = `
-    <span class="flag">${lang.flag}</span>
-    <div class="lang-ko">${lang.ko}</div>
-    <div class="lang-native">${lang.native}</div>
-  `;
-  card.onclick = () => selectLanguage(idx);
-  grid.appendChild(card);
-});
+function initGrid() {
+  const grid = document.getElementById('countryGrid');
+  grid.innerHTML = '';
+  languages.forEach((lang, idx) => {
+    const card = document.createElement('div');
+    card.className = 'country-card';
+    card.innerHTML = `
+      <span class="flag">${lang.flag}</span>
+      <div class="lang-ko">${lang.ko}</div>
+      <div class="lang-native">${lang.native}</div>
+    `;
+    card.onclick = () => selectLanguage(idx);
+    grid.appendChild(card);
+  });
+}
 
-// 언어 선택 시 상세 화면으로 이동
 function selectLanguage(idx) {
   const lang = languages[idx];
-  
   document.getElementById('homeView').classList.remove('active');
   document.getElementById('detailView').classList.add('active');
   document.getElementById('homeBtn').style.display = 'flex';
-  
   document.getElementById('selectedTitle').innerHTML = `${lang.flag} ${lang.ko} (${lang.native}) 음성 안내`;
   
   const list = document.getElementById('phraseList');
@@ -219,74 +156,73 @@ function selectLanguage(idx) {
     item.className = 'phrase-item';
     item.innerHTML = `
       <div class="phrase-ko">${koText}</div>
-      <button class="play-btn" onclick="playGoogleTTS('${encodeURIComponent(ttsText)}', '${lang.code}', this)">
+      <button class="play-btn" onclick="playSpeech(this, ${idx}, ${pIdx})">
         🔊 재생
       </button>
     `;
     list.appendChild(item);
   });
-  
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// 홈으로 버튼 클릭 시
 function goHome() {
-  stopAudio();
+  stopSpeech();
   document.getElementById('detailView').classList.remove('active');
   document.getElementById('homeView').classList.add('active');
   document.getElementById('homeBtn').style.display = 'none';
 }
 
-// 오디오 객체 관리
+let activeBtn = null;
 let currentAudio = null;
-let currentBtn = null;
 
-// 구글 TTS MP3 실시간 스트리밍 재생 함수 (아이폰 100% 호환)
-function playGoogleTTS(encodedText, langCode, btnElement) {
-  stopAudio(); // 기존 재생 중인 소리 중지
+function playSpeech(btn, langIdx, phraseIdx) {
+  stopSpeech();
+  activeBtn = btn;
+  btn.classList.add('playing');
+  btn.innerHTML = '🔊 재생 중...';
 
-  // Google Translate TTS URL 구축
-  const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${langCode}&client=tw-ob`;
+  const lang = languages[langIdx];
+  const text = lang.tts[phraseIdx];
+
+  // 1차 시도: 구글 온라인 TTS MP3 스트리밍 (아이폰 및 다국어 완벽 지원)
+  const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang.code.split('-')[0]}&client=tw-ob`;
   
-  currentAudio = new Audio(ttsUrl);
-  currentBtn = btnElement;
-
-  btnElement.classList.add('playing');
-  btnElement.innerHTML = '🔊 재생 중...';
-
-  currentAudio.play().catch(err => {
-    console.log('재생 실패 fallback 시도:', err);
-    // 브라우저 백업 TTS
-    fallbackBrowserTTS(decodeURIComponent(encodedText), langCode);
+  currentAudio = new Audio(googleTtsUrl);
+  currentAudio.play().then(() => {
+    currentAudio.onended = stopSpeech;
+  }).catch(() => {
+    // 구글 차단 시 Web Speech API 브라우저 내장 TTS 로 2차 실행
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang.code;
+      utterance.rate = 0.85;
+      utterance.onend = stopSpeech;
+      utterance.onerror = stopSpeech;
+      window.speechSynthesis.speak(utterance);
+    } else {
+      stopSpeech();
+    }
   });
-
-  currentAudio.onended = function() {
-    resetBtn(btnElement);
-  };
-  
-  currentAudio.onerror = function() {
-    resetBtn(btnElement);
-    // 오류 발생 시 브라우저 내장 TTS로 시도
-    fallbackBrowserTTS(decodeURIComponent(encodedText), langCode);
-  };
 }
 
-function stopAudio() {
+function stopSpeech() {
   if (currentAudio) {
     currentAudio.pause();
     currentAudio = null;
   }
-  if (currentBtn) {
-    resetBtn(currentBtn);
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  if (activeBtn) {
+    activeBtn.classList.remove('playing');
+    activeBtn.innerHTML = '🔊 재생';
+    activeBtn = null;
   }
 }
 
-function resetBtn(btn) {
-  if (btn) {
-    btn.classList.remove('playing');
-    btn.innerHTML = '🔊 재생';
-  }
-}
-
-// 구글 서버 접속이 원활하지 않을 때를 대비한 백업 재생기
-function fallbackBrowserTTS(text, langCode) {
+// 화면 로드 시 실행
+window.onload = initGrid;
+</script>
+</body>
+</html>
