@@ -199,7 +199,7 @@ function playWebTTS(btn, langIdx, phraseIdx) {
     const audioEl = document.querySelector(item);
     if (audioEl) {
  currentAudioEl = audioEl;
-audioEl.volume = 0.5; // 베트남어·몽골어 녹음 음량 50%
+audioEl.volume = 0.7; // 베트남어·몽골어 녹음 음량 70%
 audioEl.currentTime = 0;
 audioEl.play().then(() => {
         audioEl.onended = resetPlayBtn;
