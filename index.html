@@ -74,13 +74,35 @@ const languages = [
     code: "zh-CN", flag: "🇨🇳", ko: "중국어", native: "中文",
     tts: ["请深吸一口气，然后憋住。", "请呼气。", "请平躺。", "请面向墙壁躺下。", "请脱鞋躺下。", "请脱下外衣。", "请脱下裤子和内裤，穿上诊察服。", "检查结束了。请擦掉凝胶并穿上外衣。", "请在外面稍等。"]
   },
-  {
+ {
     code: "mn-MN", flag: "🇲🇳", ko: "몽골어", native: "Монгол",
-    tts: ["Гүнзгий амьсгаа аваад түгжээрэй.", "Амьсгаагаа гаргаарай.", "Чигээрээ харж хэвтэнэ үү.", "Ханан тал руу харж хэвтэнэ үү.", "Гутал аа тайлаад хэвтэнэ үү.", "Халаад аа тайлна уу.", "Өмд болон дотуур хувцсаа тайлаад халаад өмсөнө үү.", "Шинжилгээ дууслаа. Желээ арчаад халаадаа өмсөнө үү.", "Гадаа хүлээнэ үү."]
+    tts: [
+      // 1번 문항에 깃허브 오디오 파일 URL 적용
+      "몽골-숨크게.m4a", 
+      "Амьсгаагаа гаргаарай.", // 2번 문항 (기존 텍스트)
+      "Чигээрээ харж хэвтэнэ үү.",
+      "Ханан тал руу харж хэвтэнэ үү.",
+      "Гутал аа тайлаад хэвтэнэ үү.",
+      "Халаад аа тайлна уу.",
+      "Өмд болон дотуур хувцсаа тайлаад халаад өмсөнө үү.",
+      "Шинжилгээ дууслаа. Желээ арчаад халаадаа өмсөнө үү.",
+      "Гадаа хүлээнэ үү."
+    ]
   },
-  {
+ {
     code: "vi-VN", flag: "🇻🇳", ko: "베트남어", native: "Tiếng Việt",
-    tts: ["Hít một hơi thật sâu và nín thở.", "Thở ra.", "Nằm ngửa ra.", "Nằm nghiêng quay mặt vào tường.", "Xin vui lòng tháo giày và nằm xuống.", "Cởi áo khoác ngoài ra.", "Hãy cởi quần và quần lót ra rồi mặc áo choàng vào.", "Kiểm tra đã xong. Hãy lau sạch gel và mặc áo choàng vào.", "Xin vui lòng chờ ở bên ngoài."]
+    tts: [
+      // 1번 문항에 깃허브 오디오 파일 URL 적용
+      "베트남어-숨들여마시고-참으세요.m4a", 
+      "Thở ra.", // 2번 문항 (기존 텍스트)
+      "Nằm ngửa ra.",
+      "Nằm nghiêng quay mặt vào tường.",
+      "Xin vui lòng tháo giày và nằm xuống.",
+      "Cởi áo khoác ngoài ra.",
+      "Hãy cởi quần và quần lót ra rồi mặc áo choàng vào.",
+      "Kiểm tra đã xong. Hãy lau sạch gel và mặc áo choàng vào.",
+      "Xin vui lòng chờ ở bên ngoài."
+    ]
   },
   {
     code: "th-TH", flag: "🇹🇭", ko: "태국어", native: "ไทย",
@@ -96,7 +118,7 @@ const languages = [
   },
   {
     code: "ne-NP", flag: "🇳🇵", ko: "네팔어", native: "नेपाली",
-    tts: ["लामो सास फेर्नुहोस् र रोक्नुहोस्।", "सास बाहिर छोड्नुहोस्।", "सिधा पल्टिनुहोस्।", "भित्तातर्फ फर्केर पल्टिनुहोस्।", "জুত্তা खोलेर पल्टिनुहोस्।", "गाउन खोल्नुहोस्।", "प्यान्ट र भित्री वस्त्र खोलेर गाउन लगाउनुहोस्।", "जाँच सकियो। जेल पुछेर गाउन लगाउनुहोस्।", "बाहिर पर्खनुहोस्।"]
+    tts: ["लामो सास फेर्नुहोस् र रोक्नुहोस्।", "सास बाहिर छोड्नुहोस्।", "सिधा पल्टिनुहोस्।", "भित्तातर्फ फर्केर पल्टिनुहोस्।", "जुत्ता खोलेर पल्टिनुहोस्।", "गाउन खोल्नुहोस्।", "प्यान्ट र भित्री वस्त्र खोलेर गाउन लगाउनुहोस्।", "जाँच सकियो। जेल पुछेर गाउन लगाउनुहोस्।", "बाहिर पर्खनुहोस्।"]
   },
   {
     code: "id-ID", flag: "🇮🇩", ko: "인도네시아어", native: "Bahasa Indonesia",
@@ -151,12 +173,11 @@ function selectLanguage(idx) {
   list.innerHTML = '';
 
   koreanPhrases.forEach((koText, pIdx) => {
-    const ttsText = lang.tts[pIdx];
     const item = document.createElement('div');
     item.className = 'phrase-item';
     item.innerHTML = `
       <div class="phrase-ko">${koText}</div>
-      <button class="play-btn" onclick="playSpeech(this, ${idx}, ${pIdx})">
+      <button class="play-btn" onclick="playWebTTS(this, ${idx}, ${pIdx})">
         🔊 재생
       </button>
     `;
@@ -166,62 +187,52 @@ function selectLanguage(idx) {
 }
 
 function goHome() {
-  stopSpeech();
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   document.getElementById('detailView').classList.remove('active');
   document.getElementById('homeView').classList.add('active');
   document.getElementById('homeBtn').style.display = 'none';
 }
 
 let activeBtn = null;
-let currentAudio = null;
 
-function playSpeech(btn, langIdx, phraseIdx) {
-  stopSpeech();
+function playWebTTS(btn, langIdx, phraseIdx) {
+  if (!('speechSynthesis' in window)) {
+    alert('이 브라우저는 음성 재생을 지원하지 않습니다.');
+    return;
+  }
+
+  // 이전 재생 중지
+  window.speechSynthesis.cancel();
+  if (activeBtn) {
+    activeBtn.classList.remove('playing');
+    activeBtn.innerHTML = '🔊 재생';
+  }
+
   activeBtn = btn;
   btn.classList.add('playing');
   btn.innerHTML = '🔊 재생 중...';
 
   const lang = languages[langIdx];
   const text = lang.tts[phraseIdx];
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang.code;
+  utterance.rate = 0.85; // 검진용으로 또또박또박 천천히 발음
 
-  // 1차 시도: 구글 온라인 TTS MP3 스트리밍 (아이폰 및 다국어 완벽 지원)
-  const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang.code.split('-')[0]}&client=tw-ob`;
-  
-  currentAudio = new Audio(googleTtsUrl);
-  currentAudio.play().then(() => {
-    currentAudio.onended = stopSpeech;
-  }).catch(() => {
-    // 구글 차단 시 Web Speech API 브라우저 내장 TTS 로 2차 실행
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang.code;
-      utterance.rate = 0.85;
-      utterance.onend = stopSpeech;
-      utterance.onerror = stopSpeech;
-      window.speechSynthesis.speak(utterance);
-    } else {
-      stopSpeech();
-    }
-  });
-}
-
-function stopSpeech() {
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio = null;
-  }
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-  }
-  if (activeBtn) {
-    activeBtn.classList.remove('playing');
-    activeBtn.innerHTML = '🔊 재생';
+  utterance.onend = function() {
+    btn.classList.remove('playing');
+    btn.innerHTML = '🔊 재생';
     activeBtn = null;
-  }
+  };
+
+  utterance.onerror = function() {
+    btn.classList.remove('playing');
+    btn.innerHTML = '🔊 재생';
+    activeBtn = null;
+  };
+
+  window.speechSynthesis.speak(utterance);
 }
 
-// 화면 로드 시 실행
 window.onload = initGrid;
 </script>
 </body>
