@@ -198,9 +198,10 @@ function playWebTTS(btn, langIdx, phraseIdx) {
   if (item.startsWith('#')) {
     const audioEl = document.querySelector(item);
     if (audioEl) {
-      currentAudioEl = audioEl;
-      audioEl.currentTime = 0; // 처음부터 재생
-      audioEl.play().then(() => {
+ currentAudioEl = audioEl;
+audioEl.volume = 0.5; // 베트남어·몽골어 녹음 음량 50%
+audioEl.currentTime = 0;
+audioEl.play().then(() => {
         audioEl.onended = resetPlayBtn;
       }).catch(err => {
         console.error('Audio Tag 재생 실패:', err);
