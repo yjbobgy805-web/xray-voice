@@ -38,6 +38,10 @@
 </head>
 <body>
 
+<!-- 🔊 준비한 파일용 Audio 태그 선언 (필요 시 계속 추가 가능) -->
+<audio id="audio-vi-1" src="베트남어-숨들여마시고-참으세요.m4a" preload="auto"></audio>
+<audio id="audio-mn-1" src="몽골-숨크게.m4a" preload="auto"></audio>
+
 <div class="container">
   <header>
     <h1>🏥 다국어 검진 안내 서비스</h1>
@@ -74,34 +78,18 @@ const languages = [
     code: "zh-CN", flag: "🇨🇳", ko: "중국어", native: "中文",
     tts: ["请深吸一口气，然后憋住。", "请呼气。", "请平躺。", "请面向墙壁躺下。", "请脱鞋躺下。", "请脱下外衣。", "请脱下裤子和内裤，穿上诊察服。", "检查结束了。请擦掉凝胶并穿上外衣。", "请在外面稍等。"]
   },
- {
+  {
     code: "mn-MN", flag: "🇲🇳", ko: "몽골어", native: "Монгол",
     tts: [
-      // 1번 문항에 깃허브 오디오 파일 URL 적용
-      "몽골-숨크게.m4a", 
-      "Амьсгаагаа гаргаарай.", // 2번 문항 (기존 텍스트)
-      "Чигээрээ харж хэвтэнэ үү.",
-      "Ханан тал руу харж хэвтэнэ үү.",
-      "Гутал аа тайлаад хэвтэнэ үү.",
-      "Халаад аа тайлна уу.",
-      "Өмд болон дотуур хувцсаа тайлаад халаад өмсөнө үү.",
-      "Шинжилгээ дууслаа. Желээ арчаад халаадаа өмсөнө үү.",
-      "Гадаа хүлээнэ үү."
+      "#audio-mn-1", // 몽골어 1번 항목 오디오 태그 ID 지정
+      "Амьсгаагаа гаргаарай.", "Чигээрээ харж хэвтэнэ үү.", "Ханан тал руу харж хэвтэнэ үү.", "Гутал аа тайлаад хэвтэнэ үү.", "Халаад аа тайлна уу.", "Өмд болон дотуур хувцсаа тайлаад халаад өмсөнө үү.", "Шинжилгээ дууслаа. Желээ арчаад халаадаа өмсөнө үү.", "Гадаа хүлээнэ үү."
     ]
   },
- {
+  {
     code: "vi-VN", flag: "🇻🇳", ko: "베트남어", native: "Tiếng Việt",
     tts: [
-      // 1번 문항에 깃허브 오디오 파일 URL 적용
-      "베트남어-숨들여마시고-참으세요.m4a", 
-      "Thở ra.", // 2번 문항 (기존 텍스트)
-      "Nằm ngửa ra.",
-      "Nằm nghiêng quay mặt vào tường.",
-      "Xin vui lòng tháo giày và nằm xuống.",
-      "Cởi áo khoác ngoài ra.",
-      "Hãy cởi quần và quần lót ra rồi mặc áo choàng vào.",
-      "Kiểm tra đã xong. Hãy lau sạch gel và mặc áo choàng vào.",
-      "Xin vui lòng chờ ở bên ngoài."
+      "#audio-vi-1", // 베트남어 1번 항목 오디오 태그 ID 지정
+      "Thở ra.", "Nằm ngửa ra.", "Nằm nghiêng quay mặt vào tường.", "Xin vui lòng tháo giày và nằm xuống.", "Cởi áo khoác ngoài ra.", "Hãy cởi quần và quần lót ra rồi mặc áo choàng vào.", "Kiểm tra đã xong. Hãy lau sạch gel và mặc áo choàng vào.", "Xin vui lòng chờ ở bên ngoài."
     ]
   },
   {
@@ -187,50 +175,77 @@ function selectLanguage(idx) {
 }
 
 function goHome() {
-  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  stopAllAudio();
   document.getElementById('detailView').classList.remove('active');
   document.getElementById('homeView').classList.add('active');
   document.getElementById('homeBtn').style.display = 'none';
 }
 
 let activeBtn = null;
+let currentAudioEl = null;
 
 function playWebTTS(btn, langIdx, phraseIdx) {
-  if (!('speechSynthesis' in window)) {
-    alert('이 브라우저는 음성 재생을 지원하지 않습니다.');
-    return;
-  }
-
-  // 이전 재생 중지
-  window.speechSynthesis.cancel();
-  if (activeBtn) {
-    activeBtn.classList.remove('playing');
-    activeBtn.innerHTML = '🔊 재생';
-  }
+  stopAllAudio();
 
   activeBtn = btn;
   btn.classList.add('playing');
   btn.innerHTML = '🔊 재생 중...';
 
   const lang = languages[langIdx];
-  const text = lang.tts[phraseIdx];
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = lang.code;
-  utterance.rate = 0.85; // 검진용으로 또또박또박 천천히 발음
+  const item = lang.tts[phraseIdx];
 
-  utterance.onend = function() {
-    btn.classList.remove('playing');
-    btn.innerHTML = '🔊 재생';
+  // 1. '#audio-'로 시작하면 <audio> 태그 요소 재생
+  if (item.startsWith('#')) {
+    const audioEl = document.querySelector(item);
+    if (audioEl) {
+      currentAudioEl = audioEl;
+      audioEl.currentTime = 0; // 처음부터 재생
+      audioEl.play().then(() => {
+        audioEl.onended = resetPlayBtn;
+      }).catch(err => {
+        console.error('Audio Tag 재생 실패:', err);
+        alert('오디오 파일 재생에 실패했습니다. 파일 경로나 이름을 확인해주세요.');
+        resetPlayBtn();
+      });
+    } else {
+      alert('오디오 태그(' + item + ')를 찾을 수 없습니다.');
+      resetPlayBtn();
+    }
+  } 
+  // 2. 일반 텍스트 문장이면 브라우저 내장 TTS 재생
+  else {
+    if (!('speechSynthesis' in window)) {
+      alert('이 브라우저는 음성 재생을 지원하지 않습니다.');
+      resetPlayBtn();
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(item);
+    utterance.lang = lang.code;
+    utterance.rate = 0.85;
+    utterance.onend = resetPlayBtn;
+    utterance.onerror = resetPlayBtn;
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
+function stopAllAudio() {
+  if (currentAudioEl) {
+    currentAudioEl.pause();
+    currentAudioEl.currentTime = 0;
+    currentAudioEl = null;
+  }
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  resetPlayBtn();
+}
+
+function resetPlayBtn() {
+  if (activeBtn) {
+    activeBtn.classList.remove('playing');
+    activeBtn.innerHTML = '🔊 재생';
     activeBtn = null;
-  };
-
-  utterance.onerror = function() {
-    btn.classList.remove('playing');
-    btn.innerHTML = '🔊 재생';
-    activeBtn = null;
-  };
-
-  window.speechSynthesis.speak(utterance);
+  }
 }
 
 window.onload = initGrid;
